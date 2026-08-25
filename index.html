@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>AÉRÉ | Минималистичная парфюмерия</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Подключаем CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Кнопка переключения темы -->
+<button class="theme-toggle" id="themeToggle" aria-label="Переключить тему">
+    <i class="fas fa-moon"></i>
+    <i class="fas fa-sun"></i>
+</button>
+
+<header>
+    <div class="container">
+        <div class="navbar">
+            <div class="logo">AÉRÉ</div>
+            <div class="header-actions">
+                <div class="account-icon" id="accountIcon">
+                    <i class="fas fa-user"></i>
+                    <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
+                </div>
+                <div class="cart-icon" id="cartIcon">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span class="cart-count" id="cartCount">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main>
+    <div class="container">
+        <div class="hero">
+            <h1>Ароматы, которые вдохновляют</h1>
+            <p>❗️Акция для новых клиентов❗️</p>
+            <p>Тестер любого аналога, который вы выберете, всего за 200 ₽</p>
+            <p>Эксклюзивная парфюмерия премиум-класса. 99% сходство с мировыми брендами. Безупречная стойкость и элегантность в каждом флаконе.</p>
+        </div>
+
+        <div class="section-title">Избранные композиции</div>
+
+        <div class="tabs-container">
+            <button class="tab-btn active" data-type="parfum">Парфюмерная вода</button>
+            <button class="tab-btn" data-type="eau">Туалетная вода</button>
+        </div>
+
+        <div class="gender-tabs-container" id="genderTabsContainer">
+            <button class="gender-tab-btn active" data-gender="all">Все</button>
+            <button class="gender-tab-btn" data-gender="female">Женские</button>
+            <button class="gender-tab-btn" data-gender="male">Мужские</button>
+            <button class="gender-tab-btn" data-gender="unisex">Унисекс</button>
+        </div>
+
+        <!-- Индикатор загрузки -->
+        <div id="loadingIndicator" style="text-align: center; padding: 40px; color: var(--text-muted);">
+            <i class="fas fa-spinner fa-spin"></i> Загрузка данных...
+        </div>
+
+        <div class="products-grid" id="productsGrid" style="display: none;"></div>
+    </div>
+</main>
+
+<!-- Секция "О нас" -->
+<section class="about-section" id="aboutSection">
+    <div class="container">
+        <div class="about-grid">
+            <div class="about-text">
+                <span class="about-tag">О компании</span>
+                <h2>Доступная роскошь для ценителей</h2>
+                <p>Мы — официальный дистрибьютор премиальной парфюмерии, создающей точные аналоги лучших мировых ароматов. Наша продукция повторяет оригинальные композиции с точностью до 99%, сохраняя все ноты и характер культовых брендов.</p>
+                <p>Каждый флакон — это результат кропотливой работы парфюмеров, использующих высококачественное сырье из Франции и Италии. Мы предлагаем ароматы с исключительной стойкостью (от 8 до 12 часов), которые не уступают оригиналам, но стоят в разы доступнее.</p>
+                <p>Никаких компромиссов: только изысканные композиции, узнаваемые шлейфы и бережное отношение к вашему бюджету. Почувствуйте разницу — качество, которое не требует переплат.</p>
+                <div class="about-stats">
+                    <div><strong>99%</strong><span>Сходство с оригиналами</span></div>
+                    <div><strong>8-12ч</strong><span>Стойкость аромата</span></div>
+                    <div><strong>50+</strong><span>Ароматов в коллекции</span></div>
+                </div>
+            </div>
+            <div class="about-image">
+                <img src="https://i.ibb.co/jZDGNg98/photo-2026-06-20-11-38-20.jpg" alt="AÉRÉ Perfume" style="width: 100%; height: 100%; object-fit: cover; border-radius: 24px;">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== ОБНОВЛЕННЫЙ ФУТЕР ===== -->
+<footer>
+    <div class="container">
+        <div class="footer-content">
+            <!-- Бренд -->
+            <div class="footer-brand">
+                <div class="footer-logo">AÉRÉ</div>
+                <p class="footer-description">Премиальная парфюмерия с 99% сходством с оригиналами. Создано с любовью к деталям.</p>
+            </div>
+            
+            <!-- Контакты -->
+            <div class="footer-contacts">
+                <h4>Контакты</h4>
+                <div class="contact-item">
+                    <i class="fas fa-envelope"></i>
+                    <a href="mailto:image.stock1001@gmail.com">image.stock1001@gmail.com</a>
+                </div>
+                <div class="contact-item">
+                    <i class="fab fa-telegram"></i>
+                    <a href="https://t.me/AERE_RU" target="_blank">@AERE_RU</a>
+                </div>
+                <div class="contact-item">
+                    <i class="fab fa-telegram"></i>
+                    <a href="https://t.me/AERE_RB" target="_blank">@AERE_RB</a>
+                </div>
+            </div>
+            
+            <!-- Партнерство (вместо Поддержки) -->
+            <div class="footer-partnership">
+                <h4>🤝 Партнерство</h4>
+                <p class="partnership-desc">
+                    Станьте нашим партнером и зарабатывайте на продажах!
+                </p>
+                <a href="crm.html" class="partnership-link" target="_blank">
+                    <i class="fas fa-users-cog"></i> Войти в CRM систему
+                </a>
+                <p class="partnership-note">
+                    * Для партнеров доступна CRM система управления клиентами
+                </p>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>© 2026 AÉRÉ — премиальная парфюмерия. Все права защищены.</p>
+        </div>
+    </div>
+</footer>
+
+<!-- Корзина -->
+<div class="cart-overlay" id="cartOverlay"></div>
+<div class="cart-sidebar" id="cartSidebar">
+    <div class="cart-header">
+        <h3>Корзина</h3>
+        <div class="close-cart" id="closeCartBtn">&times;</div>
+    </div>
+    <div class="cart-items" id="cartItemsContainer">
+        <div class="empty-cart-msg">Ваша корзина пуста</div>
+    </div>
+    <div class="cart-total" id="cartTotalBlock">
+        <span>Итого</span>
+        <span id="cartTotalPrice">0 ₽</span>
+    </div>
+    <button class="checkout-btn" id="checkoutBtn">Оформить заказ</button>
+</div>
+
+<!-- Личный кабинет -->
+<div class="account-overlay" id="accountOverlay"></div>
+<div class="account-sidebar" id="accountSidebar">
+    <div class="account-header">
+        <h3>Личный кабинет</h3>
+        <div class="close-account" id="closeAccountBtn">&times;</div>
+    </div>
+    <div class="account-content" id="accountContent">
+        <div id="loginForm" class="account-form">
+            <div class="account-avatar">
+                <i class="fas fa-user-circle"></i>
+            </div>
+            <h4>Вход в аккаунт</h4>
+            <input type="email" id="loginEmail" placeholder="Email" class="account-input">
+            <input type="password" id="loginPassword" placeholder="Пароль" class="account-input">
+            <button id="doLoginBtn" class="account-btn">Войти</button>
+            <p class="account-switch">Нет аккаунта? <a href="#" id="showRegister">Зарегистрироваться</a></p>
+        </div>
+        
+        <div id="registerForm" class="account-form hidden">
+            <div class="account-avatar">
+                <i class="fas fa-user-plus"></i>
+            </div>
+            <h4>Регистрация</h4>
+            <input type="text" id="regName" placeholder="Имя" class="account-input">
+            <input type="email" id="regEmail" placeholder="Email" class="account-input">
+            <input type="text" id="regTelegram" placeholder="Ник в Telegram (например: @username)" class="account-input">
+            <input type="password" id="regPassword" placeholder="Пароль" class="account-input">
+            <input type="password" id="regConfirm" placeholder="Повторите пароль" class="account-input">
+            <button id="doRegisterBtn" class="account-btn">Зарегистрироваться</button>
+            <p class="account-switch">Уже есть аккаунт? <a href="#" id="showLogin">Войти</a></p>
+        </div>
+        
+        <div id="userDashboard" class="user-dashboard hidden">
+            <div class="account-avatar">
+                <i class="fas fa-user-circle"></i>
+            </div>
+            <h4 id="userNameDisplay">Пользователь</h4>
+            <p id="userEmailDisplay"></p>
+            <p id="userTelegramDisplay" style="text-align:center;color:var(--text-muted);font-size:0.85rem;"></p>
+            
+            <div class="notifications-section">
+                <div class="notifications-header">
+                    <h5><i class="fas fa-bell"></i> Уведомления</h5>
+                    <button id="markAllReadBtn" class="mark-read-btn">Прочитать все</button>
+                </div>
+                <div id="notificationsList" class="notifications-list">
+                    <p class="empty-notifications">Нет уведомлений</p>
+                </div>
+            </div>
+            
+            <div class="user-orders">
+                <h5>Мои заказы</h5>
+                <div id="userOrdersList" class="orders-list">
+                    <p class="empty-orders">У вас пока нет заказов</p>
+                </div>
+            </div>
+            <button id="logoutBtn" class="account-btn logout-btn">Выйти</button>
+        </div>
+        
+        <div id="adminPanel" class="admin-panel hidden">
+            <div class="admin-header">
+                <h4><i class="fas fa-shield-alt"></i> Панель администратора</h4>
+            </div>
+            <div class="admin-send-notification">
+                <h5>Отправить уведомление всем пользователям</h5>
+                <input type="text" id="notificationTitle" placeholder="Заголовок" class="account-input">
+                <textarea id="notificationMessage" placeholder="Текст уведомления..." class="account-textarea" rows="3"></textarea>
+                <button id="sendNotificationBtn" class="account-btn">Отправить уведомление</button>
+            </div>
+            <div class="admin-stats">
+                <h5>Статистика</h5>
+                <p>Всего пользователей: <span id="totalUsersCount">0</span></p>
+                <p>Всего заказов: <span id="totalOrdersCount">0</span></p>
+            </div>
+            <button id="adminSyncBtn" class="account-btn" style="background: var(--success-color);">
+                <i class="fas fa-sync"></i> Синхронизировать с облаком
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно товара -->
+<div id="productModal" class="modal-overlay">
+    <div class="modal-container">
+        <div class="modal-close">&times;</div>
+        <div class="modal-content" id="modalContent"></div>
+    </div>
+</div>
+
+<!-- Модальное окно заказа -->
+<div class="order-modal-overlay" id="orderModalOverlay">
+    <div class="order-modal-container">
+        <div class="order-modal-header">
+            <h3>Оформление заказа</h3>
+            <div class="order-modal-close" id="orderModalClose">&times;</div>
+        </div>
+        <div class="order-modal-body">
+            <div class="order-summary" id="orderSummary"></div>
+            <form id="orderForm">
+                <div class="form-group">
+                    <label for="deliveryAddress">Адрес доставки</label>
+                    <input type="text" id="deliveryAddress" placeholder="Введите полный адрес доставки" required>
+                </div>
+                <div class="form-group">
+                    <label for="deliveryPhone">Телефон для связи</label>
+                    <input type="tel" id="deliveryPhone" placeholder="+7 (XXX) XXX-XX-XX" required>
+                </div>
+                <div class="form-group">
+                    <label for="deliveryComment">Комментарий к заказу</label>
+                    <textarea id="deliveryComment" rows="3" placeholder="Дополнительные пожелания..."></textarea>
+                </div>
+                <button type="submit" class="confirm-order-btn" id="confirmOrderBtn">
+                    <i class="fas fa-check"></i> Подтвердить заказ
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div id="toastMsg" class="toast-notify">Товар добавлен</div>
+
+<!-- Подключаем скрипты -->
+<script src="jsonbin-api.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

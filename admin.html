@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Admin Panel | AÉRÉ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="jsonbin-api.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #faf7f5;
+            --text-primary: #1a1a1a;
+            --text-secondary: #5a5a5a;
+            --text-muted: #7c7c7c;
+            --border-color: #f0f0f0;
+            --card-bg: #ffffff;
+            --header-bg: rgba(255, 255, 255, 0.92);
+            --shadow-color: rgba(0, 0, 0, 0.05);
+            --accent-color: #b47c5e;
+            --accent-dark: #8b5a42;
+            --danger-color: #e74c3c;
+            --success-color: #27ae60;
+        }
+        [data-theme="dark"] {
+            --bg-primary: #121212;
+            --bg-secondary: #1e1e1e;
+            --text-primary: #f5f5f5;
+            --text-secondary: #b0b0b0;
+            --text-muted: #9e9e9e;
+            --border-color: #2a2a2a;
+            --card-bg: #1e1e1e;
+            --header-bg: rgba(18, 18, 18, 0.92);
+            --accent-color: #d49c7a;
+        }
+        body { font-family: 'Montserrat', sans-serif; background: var(--bg-primary); color: var(--text-primary); transition: background 0.3s; min-height: 100vh; }
+        .login-container { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--bg-primary), var(--bg-secondary)); padding: 20px; }
+        .login-card { background: var(--card-bg); border-radius: 32px; padding: 48px 40px; width: 100%; max-width: 420px; box-shadow: 0 25px 50px var(--shadow-color); border: 1px solid var(--border-color); text-align: center; }
+        .login-card .logo { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 600; background: linear-gradient(135deg, var(--text-primary), var(--accent-color)); background-clip: text; -webkit-background-clip: text; color: transparent; }
+        .login-card .logo span { font-size: 0.8rem; background: var(--accent-color); color: white; padding: 2px 8px; border-radius: 20px; margin-left: 8px; }
+        .login-card h2 { font-family: 'Playfair Display', serif; font-size: 1.5rem; margin: 20px 0 8px; color: var(--text-primary); }
+        .login-card p { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 32px; }
+        .form-group { margin-bottom: 20px; text-align: left; }
+        .form-group label { display: block; font-size: 0.8rem; font-weight: 500; margin-bottom: 8px; color: var(--text-secondary); }
+        .form-group input { width: 100%; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; padding: 14px 16px; font-family: 'Montserrat', sans-serif; font-size: 0.9rem; color: var(--text-primary); transition: all 0.2s; }
+        .form-group input:focus { outline: none; border-color: var(--accent-color); }
+        .login-btn { width: 100%; background: var(--accent-color); color: white; border: none; padding: 14px; border-radius: 40px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 1rem; cursor: pointer; transition: all 0.2s; margin-top: 8px; }
+        .login-btn:hover { background: var(--accent-dark); transform: scale(1.02); }
+        .back-link { display: block; margin-top: 24px; color: var(--text-muted); text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
+        .back-link:hover { color: var(--accent-color); }
+        .error-msg { background: rgba(231, 76, 60, 0.1); border: 1px solid var(--danger-color); color: var(--danger-color); padding: 10px; border-radius: 8px; font-size: 0.8rem; margin-bottom: 20px; display: none; }
+        .admin-wrapper { display: none; }
+        .admin-wrapper.show { display: block; }
+        .theme-toggle { position: fixed; bottom: 30px; right: 30px; width: 52px; height: 52px; border-radius: 50%; background: var(--card-bg); border: 1px solid var(--border-color); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; z-index: 1000; transition: all 0.3s; box-shadow: 0 4px 12px var(--shadow-color); color: var(--text-primary); }
+        .theme-toggle:hover { transform: scale(1.1); border-color: var(--accent-color); }
+        .theme-toggle .fa-sun { display: none; }
+        [data-theme="dark"] .theme-toggle .fa-moon { display: none; }
+        [data-theme="dark"] .theme-toggle .fa-sun { display: block; color: #ffd966; }
+        .admin-header { background: var(--header-bg); backdrop-filter: blur(14px); border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 100; }
+        .header-container { max-width: 1400px; margin: 0 auto; padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+        .logo { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 600; background: linear-gradient(135deg, var(--text-primary), var(--accent-color)); background-clip: text; -webkit-background-clip: text; color: transparent; }
+        .logo span { font-size: 0.8rem; background: var(--accent-color); color: white; padding: 2px 8px; border-radius: 20px; margin-left: 10px; }
+        .header-actions { display: flex; gap: 20px; align-items: center; }
+        .back-to-site { background: transparent; border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 40px; cursor: pointer; font-family: 'Montserrat', sans-serif; color: var(--text-primary); text-decoration: none; transition: all 0.2s; }
+        .back-to-site:hover { border-color: var(--accent-color); color: var(--accent-color); }
+        .user-info { display: flex; align-items: center; gap: 12px; padding: 6px 12px; background: var(--bg-secondary); border-radius: 40px; }
+        .user-info i { color: var(--accent-color); font-size: 1.2rem; }
+        .logout-admin { background: var(--danger-color); border: none; padding: 8px 16px; border-radius: 40px; color: white; cursor: pointer; font-family: 'Montserrat', sans-serif; transition: background 0.2s; }
+        .logout-admin:hover { background: #c0392b; }
+        .admin-container { max-width: 1400px; margin: 0 auto; padding: 32px; }
+        .welcome-banner { background: linear-gradient(135deg, var(--accent-color), var(--accent-dark)); border-radius: 24px; padding: 32px; margin-bottom: 32px; color: white; }
+        .welcome-banner h1 { font-family: 'Playfair Display', serif; font-size: 1.8rem; margin-bottom: 8px; }
+        .welcome-banner p { opacity: 0.9; }
+        .admin-tabs { display: flex; gap: 12px; margin-bottom: 32px; flex-wrap: wrap; border-bottom: 2px solid var(--border-color); padding-bottom: 16px; }
+        .admin-tab-btn { background: none; border: none; padding: 10px 24px; border-radius: 40px; font-family: 'Montserrat', sans-serif; font-size: 0.9rem; font-weight: 500; cursor: pointer; color: var(--text-secondary); transition: all 0.2s; }
+        .admin-tab-btn:hover { background: var(--bg-secondary); color: var(--accent-color); }
+        .admin-tab-btn.active { background: var(--accent-color); color: white; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; margin-bottom: 40px; }
+        .stat-card { background: var(--card-bg); border-radius: 20px; padding: 24px; display: flex; align-items: center; gap: 20px; border: 1px solid var(--border-color); transition: transform 0.2s; }
+        .stat-card:hover { transform: translateY(-4px); box-shadow: 0 10px 30px var(--shadow-color); }
+        .stat-card i { font-size: 2.5rem; color: var(--accent-color); }
+        .stat-info h3 { font-size: 1.8rem; font-weight: 700; color: var(--text-primary); }
+        .stat-info p { font-size: 0.85rem; color: var(--text-muted); }
+        .chart-container { background: var(--card-bg); border-radius: 20px; padding: 24px; border: 1px solid var(--border-color); margin-bottom: 32px; }
+        .chart-container h3 { font-family: 'Playfair Display', serif; margin-bottom: 20px; }
+        canvas { max-height: 300px; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
+        .section-header h2 { font-family: 'Playfair Display', serif; font-size: 1.5rem; }
+        .btn-primary { background: var(--accent-color); color: white; border: none; padding: 10px 20px; border-radius: 40px; cursor: pointer; font-family: 'Montserrat', sans-serif; font-weight: 500; transition: all 0.2s; }
+        .btn-primary:hover { background: var(--accent-dark); transform: scale(1.02); }
+        .btn-danger { background: var(--danger-color); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; }
+        .btn-success { background: var(--success-color); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; }
+        .btn-small { padding: 6px 10px; font-size: 0.75rem; border-radius: 6px; }
+        .product-form { background: var(--bg-secondary); border-radius: 20px; padding: 24px; margin-bottom: 32px; border: 1px solid var(--border-color); display: none; }
+        .product-form.show { display: block; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 20px; }
+        .form-group { display: flex; flex-direction: column; gap: 8px; }
+        .form-group label { font-size: 0.85rem; font-weight: 500; color: var(--text-secondary); }
+        .form-group input, .form-group select, .form-group textarea { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 12px; padding: 10px 14px; font-family: 'Montserrat', sans-serif; font-size: 0.9rem; color: var(--text-primary); }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--accent-color); }
+        .form-buttons { display: flex; gap: 12px; justify-content: flex-end; }
+        .products-table-container, .orders-table-container { overflow-x: auto; }
+        .products-table, .orders-table { width: 100%; border-collapse: collapse; }
+        .products-table th, .products-table td, .orders-table th, .orders-table td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border-color); }
+        .products-table th, .orders-table th { background: var(--bg-secondary); font-weight: 600; }
+        .product-image-preview { width: 50px; height: 50px; object-fit: cover; border-radius: 8px; }
+        .action-buttons { display: flex; gap: 8px; }
+        .edit-btn, .delete-btn { background: none; border: none; cursor: pointer; font-size: 1.1rem; padding: 6px; border-radius: 6px; transition: all 0.2s; }
+        .edit-btn { color: var(--accent-color); }
+        .edit-btn:hover { background: var(--accent-color); color: white; }
+        .delete-btn { color: var(--danger-color); }
+        .delete-btn:hover { background: var(--danger-color); color: white; }
+        .notification-form { background: var(--bg-secondary); border-radius: 20px; padding: 24px; margin-bottom: 32px; border: 1px solid var(--border-color); }
+        .notification-form textarea { width: 100%; min-height: 120px; }
+        .notification-history { background: var(--card-bg); border-radius: 20px; padding: 24px; border: 1px solid var(--border-color); }
+        .history-item { padding: 16px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+        .history-item:last-child { border-bottom: none; }
+        .history-content { flex: 1; }
+        .history-title { font-weight: 600; color: var(--accent-color); margin-bottom: 4px; }
+        .history-message { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 4px; }
+        .history-date { font-size: 0.7rem; color: var(--text-muted); }
+        .history-actions { display: flex; gap: 8px; }
+        .delete-notification-btn { background: var(--danger-color); color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; transition: background 0.2s; }
+        .delete-notification-btn:hover { background: #c0392b; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px); z-index: 1000; display: flex; align-items: center; justify-content: center; visibility: hidden; opacity: 0; transition: all 0.3s; }
+        .modal-overlay.active { visibility: visible; opacity: 1; }
+        .modal-container { background: var(--card-bg); border-radius: 24px; padding: 32px; max-width: 400px; width: 90%; text-align: center; }
+        .modal-container h3 { margin-bottom: 16px; }
+        .modal-container p { margin-bottom: 24px; color: var(--text-secondary); }
+        .modal-buttons { display: flex; gap: 12px; justify-content: center; }
+        .toast-notify { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--success-color); color: white; padding: 12px 24px; border-radius: 40px; font-size: 0.9rem; z-index: 1100; opacity: 0; transition: opacity 0.3s; }
+        .toast-notify.show { opacity: 1; }
+        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(4px); z-index: 999; display: flex; align-items: center; justify-content: center; visibility: hidden; opacity: 0; transition: all 0.3s; }
+        .loading-overlay.active { visibility: visible; opacity: 1; }
+        .loading-spinner { width: 50px; height: 50px; border: 4px solid var(--border-color); border-top-color: var(--accent-color); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @media (max-width: 768px) { .header-container { padding: 12px 20px; flex-direction: column; } .admin-container { padding: 20px; } .stats-grid { grid-template-columns: 1fr; } .form-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<button class="theme-toggle" id="themeToggle" aria-label="Переключить тему">
+    <i class="fas fa-moon"></i>
+    <i class="fas fa-sun"></i>
+</button>
+
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+</div>
+
+<div id="loginPage" class="login-container">
+    <div class="login-card">
+        <div class="logo">AÉRÉ <span>Admin</span></div>
+        <h2>Вход в панель управления</h2>
+        <p>Введите данные для доступа к админ-панели</p>
+        <div id="loginError" class="error-msg"></div>
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="adminEmail" placeholder="admin@aere.com" value="admin@aere.com">
+        </div>
+        <div class="form-group">
+            <label>Пароль</label>
+            <input type="password" id="adminPassword" placeholder="admin123" value="admin123">
+        </div>
+        <button class="login-btn" id="doLoginBtn"><i class="fas fa-sign-in-alt"></i> Войти</button>
+        <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Вернуться на сайт</a>
+    </div>
+</div>
+
+<div id="adminWrapper" class="admin-wrapper">
+    <header class="admin-header">
+        <div class="header-container">
+            <div class="logo">AÉRÉ <span>Admin Panel</span></div>
+            <div class="header-actions">
+                <a href="index.html" class="back-to-site"><i class="fas fa-arrow-left"></i> На сайт</a>
+                <button class="btn-success" id="syncCloudBtn"><i class="fas fa-cloud-upload-alt"></i> Синхронизация</button>
+                <div class="user-info" id="adminUserInfo">
+                    <i class="fas fa-user-shield"></i>
+                    <span id="adminName">Admin</span>
+                </div>
+                <button class="logout-admin" id="logoutAdminBtn"><i class="fas fa-sign-out-alt"></i> Выход</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="admin-container">
+        <div class="welcome-banner">
+            <h1><i class="fas fa-shield-alt"></i> Добро пожаловать в админ-панель</h1>
+            <p>Управляйте товарами, заказами и рассылками в одном месте</p>
+        </div>
+
+        <div class="admin-tabs">
+            <button class="admin-tab-btn active" data-tab="dashboard">📊 Дашборд</button>
+            <button class="admin-tab-btn" data-tab="products">📦 Товары</button>
+            <button class="admin-tab-btn" data-tab="orders">📋 Заказы</button>
+            <button class="admin-tab-btn" data-tab="notifications">📨 Рассылка</button>
+        </div>
+
+        <div id="dashboardTab" class="tab-content active">
+            <div class="stats-grid">
+                <div class="stat-card"><i class="fas fa-box"></i><div class="stat-info"><h3 id="totalProducts">0</h3><p>Товаров</p></div></div>
+                <div class="stat-card"><i class="fas fa-shopping-cart"></i><div class="stat-info"><h3 id="totalOrders">0</h3><p>Заказов</p></div></div>
+                <div class="stat-card"><i class="fas fa-ruble-sign"></i><div class="stat-info"><h3 id="totalRevenue">0</h3><p>Выручка</p></div></div>
+                <div class="stat-card"><i class="fas fa-users"></i><div class="stat-info"><h3 id="totalUsers">0</h3><p>Клиентов</p></div></div>
+            </div>
+            <div class="chart-container">
+                <h3><i class="fas fa-chart-line"></i> Статистика продаж</h3>
+                <canvas id="salesChart"></canvas>
+            </div>
+        </div>
+
+        <div id="productsTab" class="tab-content">
+            <div class="section-header">
+                <h2><i class="fas fa-box"></i> Управление товарами</h2>
+                <button class="btn-primary" id="showAddProductBtn"><i class="fas fa-plus"></i> Добавить товар</button>
+            </div>
+
+            <div id="productForm" class="product-form">
+                <h3 id="formTitle">➕ Добавление товара</h3>
+                <input type="hidden" id="editProductId">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Название *</label>
+                        <input type="text" id="productName" placeholder="OUD SILENCE">
+                    </div>
+                    <div class="form-group">
+                        <label>Тип *</label>
+                        <select id="productType">
+                            <option value="parfum">Парфюмерная вода</option>
+                            <option value="eau">Туалетная вода</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Пол *</label>
+                        <select id="productGender">
+                            <option value="male">Мужской</option>
+                            <option value="female">Женский</option>
+                            <option value="unisex">Унисекс</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Цена (₽) *</label>
+                        <input type="number" id="productPrice" placeholder="8900">
+                    </div>
+                    <div class="form-group">
+                        <label>Объем *</label>
+                        <input type="text" id="productVolume" placeholder="50 ml">
+                    </div>
+                    <div class="form-group">
+                        <label>Краткое описание *</label>
+                        <input type="text" id="productDesc" placeholder="Древесный уд, шафран">
+                    </div>
+                    <div class="form-group">
+                        <label>URL изображения</label>
+                        <input type="text" id="productImage" placeholder="https://images.unsplash.com/...">
+                    </div>
+                    <div class="form-group">
+                        <label>Пирамида аромата</label>
+                        <input type="text" id="productNotes" placeholder="Верхние: ...; Сердце: ...; База: ...">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Полное описание</label>
+                    <textarea id="productFullDesc" rows="3" placeholder="Подробное описание..."></textarea>
+                </div>
+                <div class="form-buttons">
+                    <button class="btn-primary" id="saveProductBtn">💾 Сохранить</button>
+                    <button class="btn-danger" id="cancelProductBtn">✖ Отмена</button>
+                </div>
+            </div>
+
+            <div class="products-table-container">
+                <table class="products-table">
+                    <thead><tr><th>ID</th><th>Изобр.</th><th>Название</th><th>Тип</th><th>Пол</th><th>Цена</th><th>Действия</th></tr></thead>
+                    <tbody id="productsTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="ordersTab" class="tab-content">
+            <div class="section-header">
+                <h2><i class="fas fa-shopping-cart"></i> Все заказы</h2>
+                <button class="btn-primary" onclick="location.reload()"><i class="fas fa-sync-alt"></i> Обновить</button>
+            </div>
+            <div class="orders-table-container">
+                <table class="orders-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Клиент</th>
+                            <th>Telegram</th>
+                            <th>Товаров</th>
+                            <th>Сумма</th>
+                            <th>Партнер</th>
+                            <th>Дата</th>
+                            <th>Статус</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="notificationsTab" class="tab-content">
+            <div class="notification-form">
+                <h3><i class="fas fa-envelope"></i> Отправить уведомление</h3>
+                <div class="form-group">
+                    <label>Заголовок</label>
+                    <input type="text" id="notificationTitle" placeholder="Заголовок">
+                </div>
+                <div class="form-group">
+                    <label>Сообщение</label>
+                    <textarea id="notificationMessage" placeholder="Текст уведомления..."></textarea>
+                </div>
+                <button class="btn-primary" id="sendNotificationBtn"><i class="fas fa-paper-plane"></i> Отправить</button>
+            </div>
+            <div class="notification-history">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <h3><i class="fas fa-history"></i> История рассылок</h3>
+                    <button class="btn-danger btn-small" id="clearAllNotificationsBtn" style="padding: 6px 16px;">
+                        <i class="fas fa-trash"></i> Очистить всё
+                    </button>
+                </div>
+                <div id="notificationHistoryList"></div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Модальное окно подтверждения -->
+<div id="confirmModal" class="modal-overlay">
+    <div class="modal-container">
+        <h3 id="confirmModalTitle">Подтверждение удаления</h3>
+        <p id="confirmModalText">Вы уверены, что хотите удалить этот элемент?</p>
+        <div class="modal-buttons">
+            <button class="btn-danger" id="confirmDeleteBtn">Удалить</button>
+            <button class="btn-primary" id="cancelDeleteBtn">Отмена</button>
+        </div>
+    </div>
+</div>
+
+<div id="toastMsg" class="toast-notify"></div>
+
+<script>
+// ============================================
+// АДМИН-ПАНЕЛЬ (С СИНХРОНИЗАЦИЕЙ УВЕДОМЛЕНИЙ)
+// ============================================
+
+const PRODUCTS_KEY = 'aere_products';
+const ORDERS_KEY = 'aere_orders';
+const NOTIFICATIONS_KEY = 'aere_notifications';
+
+let products = [];
+let users = [];
+let orders = [];
+let notifications = [];
+let partners = [];
+let currentAdmin = null;
+let deleteTarget = null;
+let deleteType = null;
+let deleteTargetId = null;
+let salesChart = null;
+
+// ============================================
+// ЗАГРУЗКА ДАННЫХ
+// ============================================
+
+async function loadData() {
+    showLoading(true);
+    try {
+        const data = await JSONBinAPI.getData();
+        if (data) {
+            products = data.products || [];
+            users = data.users || [];
+            orders = data.orders || [];
+            notifications = data.notifications || [];
+            partners = data.partners || [];
+            saveToLocalStorage();
+            console.log('✅ Данные загружены из JSONBin');
+            console.log('📨 Уведомлений:', notifications.length);
+            console.log('👤 Пользователей:', users.length);
+            console.log('📦 Товаров:', products.length);
+            console.log('📋 Заказов:', orders.length);
+        } else {
+            loadFromLocalStorage();
+            console.warn('⚠️ Используем данные из localStorage');
+        }
+    } catch (error) {
+        console.error('❌ Ошибка загрузки данных:', error);
+        loadFromLocalStorage();
+    } finally {
+        showLoading(false);
+        updateAllUI();
+    }
+}
+
+function loadFromLocalStorage() {
+    products = JSON.parse(localStorage.getItem(PRODUCTS_KEY) || '[]');
+    orders = JSON.parse(localStorage.getItem(ORDERS_KEY) || '[]');
+    notifications = JSON.parse(localStorage.getItem(NOTIFICATIONS_KEY) || '[]');
+    users = JSON.parse(localStorage.getItem('aere_users') || '[]');
+    partners = JSON.parse(localStorage.getItem('crm_partners') || '[]');
+    ensureAdminExists();
+}
+
+function saveToLocalStorage() {
+    localStorage.setItem(PRODUCTS_KEY, JSON.stringify(products));
+    localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+    localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(notifications));
+    localStorage.setItem('aere_users', JSON.stringify(users));
+    localStorage.setItem('crm_partners', JSON.stringify(partners));
+}
+
+function ensureAdminExists() {
+    if (!users.find(u => u.email === 'admin@aere.com')) {
+        users.push({
+            id: 1,
+            name: "Администратор",
+            email: "admin@aere.com",
+            telegram: "",
+            password: "admin123",
+            partnerId: null,
+            registeredAt: new Date().toLocaleString()
+        });
+        saveToLocalStorage();
+    }
+}
+
+function showLoading(show) {
+    document.getElementById('loadingOverlay').classList.toggle('active', show);
+}
+
+function showToast(message) {
+    const toast = document.getElementById('toastMsg');
+    toast.textContent = message;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+function updateAllUI() {
+    updateProductsTable();
+    updateOrdersTable();
+    updateStatistics();
+    updateNotificationHistory();
+}
+
+// ============================================
+// ТАБЛИЦА ТОВАРОВ
+// ============================================
+
+function updateProductsTable() {
+    const tbody = document.getElementById('productsTableBody');
+    if (!tbody) return;
+    if (products.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-muted);">Нет товаров</td></tr>';
+        document.getElementById('totalProducts').textContent = '0';
+        return;
+    }
+    tbody.innerHTML = products.map(p => `
+        <tr>
+            <td>${p.id}</td>
+            <td><img src="${p.image || 'https://placehold.co/50x50/e8dfd9/8b5a42?text=NoImg'}" class="product-image-preview" onerror="this.src='https://placehold.co/50x50/e8dfd9/8b5a42?text=NoImg'"></td>
+            <td><strong>${p.name}</strong><br><small>${p.desc || ''}</small></td>
+            <td>${p.typeName || p.type}</td>
+            <td>${p.genderName || p.gender}</td>
+            <td>${(p.price || 0).toLocaleString()} ₽</td>
+            <td class="action-buttons">
+                <button class="edit-btn" onclick="editProduct(${p.id})"><i class="fas fa-edit"></i></button>
+                <button class="delete-btn" onclick="confirmDelete('product', ${p.id})"><i class="fas fa-trash"></i></button>
+            </td>
+        </tr>
+    `).join('');
+    document.getElementById('totalProducts').textContent = products.length;
+}
+
+// ============================================
+// ТАБЛИЦА ЗАКАЗОВ
+// ============================================
+
+function updateOrdersTable() {
+    const tbody = document.getElementById('ordersTableBody');
+    if (!tbody) return;
+    
+    if (orders.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text-muted);">Нет заказов</td></tr>';
+        return;
+    }
+    
+    const sortedOrders = [...orders].sort((a, b) => new Date(b.date) - new Date(a.date));
+    
+    let html = '';
+    let totalAmount = 0;
+    let totalItems = 0;
+    
+    sortedOrders.forEach(order => {
+        const partner = partners.find(p => p.id === order.partnerId);
+        totalAmount += order.total || 0;
+        totalItems += order.itemsCount || 0;
+        
+        html += `<tr>
+            <td>${order.id}</td>
+            <td>${order.userEmail}</td>
+            <td>${order.userTelegram || '—'}</td>
+            <td>${order.itemsCount}</td>
+            <td><strong>${(order.total || 0).toLocaleString()} ₽</strong></td>
+            <td>${partner ? partner.name : 'Без партнера'}</td>
+            <td>${order.date}</td>
+            <td><span style="color:var(--success-color);">✅ Выполнен</span></td>
+        </tr>`;
+    });
+    
+    html += `<tr style="font-weight: bold; background: var(--bg-secondary);">
+        <td colspan="3" style="text-align: right;">ИТОГО:</td>
+        <td>${totalItems}</td>
+        <td>${totalAmount.toLocaleString()} ₽</td>
+        <td colspan="3"></td>
+    </tr>`;
+    
+    tbody.innerHTML = html;
+}
+
+// ============================================
+// СТАТИСТИКА
+// ============================================
+
+function updateStatistics() {
+    const totalOrdersCount = orders.length;
+    const totalRevenue = orders.reduce((sum, o) => sum + (o.total || 0), 0);
+    const totalUsersCount = users.filter(u => u.email !== 'admin@aere.com').length;
+    
+    document.getElementById('totalOrders').textContent = totalOrdersCount;
+    document.getElementById('totalRevenue').textContent = totalRevenue.toLocaleString() + ' ₽';
+    document.getElementById('totalUsers').textContent = totalUsersCount;
+    updateChart();
+}
+
+function updateChart() {
+    const months = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+    const salesData = new Array(12).fill(0);
+    orders.forEach(o => {
+        const m = new Date(o.date).getMonth();
+        if (m >= 0 && m < 12) salesData[m] += o.total || 0;
+    });
+    const ctx = document.getElementById('salesChart').getContext('2d');
+    if (salesChart) salesChart.destroy();
+    salesChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: months,
+            datasets: [{
+                label: 'Выручка (₽)',
+                data: salesData,
+                borderColor: '#b47c5e',
+                backgroundColor: 'rgba(180,124,94,0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { labels: { color: getComputedStyle(document.body).getPropertyValue('--text-primary') } } },
+            scales: {
+                y: { ticks: { color: getComputedStyle(document.body).getPropertyValue('--text-secondary') } },
+                x: { ticks: { color: getComputedStyle(document.body).getPropertyValue('--text-secondary') } }
+            }
+        }
+    });
+}
+
+// ============================================
+// УПРАВЛЕНИЕ УВЕДОМЛЕНИЯМИ (С СИНХРОНИЗАЦИЕЙ)
+// ============================================
+
+// ===== ОТПРАВКА УВЕДОМЛЕНИЯ =====
+async function sendNotificationToAll(title, message) {
+    const notif = {
+        id: Date.now(),
+        title: title,
+        message: message,
+        date: new Date().toLocaleString(),
+        sentTo: users.filter(u => u.email !== 'admin@aere.com').length
+    };
+    
+    // Добавляем в массив
+    notifications.unshift(notif);
+    
+    // Сохраняем в localStorage
+    saveToLocalStorage();
+    
+    // СОХРАНЯЕМ В ОБЛАКО JSONBin
+    try {
+        await JSONBinAPI.syncNotifications(notifications);
+        console.log('✅ Уведомление сохранено в облако');
+    } catch (error) {
+        console.error('❌ Ошибка сохранения уведомления в облако:', error);
+        showToast('❌ Ошибка сохранения уведомления');
+        return;
+    }
+    
+    // Обновляем UI
+    updateNotificationHistory();
+    showToast(`✅ Уведомление отправлено ${notif.sentTo} пользователям`);
+    
+    // Очищаем поля
+    document.getElementById('notificationTitle').value = '';
+    document.getElementById('notificationMessage').value = '';
+}
+
+// ===== ОБНОВЛЕННАЯ ИСТОРИЯ РАССЫЛОК =====
+function updateNotificationHistory() {
+    const container = document.getElementById('notificationHistoryList');
+    if (!container) return;
+    
+    if (notifications.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:20px;">История рассылок пуста</p>';
+        return;
+    }
+    
+    container.innerHTML = notifications.map((n, index) => `
+        <div class="history-item">
+            <div class="history-content">
+                <div class="history-title">${n.title}</div>
+                <div class="history-message">${n.message}</div>
+                <div class="history-date">📅 ${n.date} | 👥 Получили: ${n.sentTo || 0} чел.</div>
+            </div>
+            <div class="history-actions">
+                <button class="delete-notification-btn" onclick="confirmDeleteNotification(${index})">
+                    <i class="fas fa-trash"></i> Удалить
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// ===== ПОДТВЕРЖДЕНИЕ УДАЛЕНИЯ РАССЫЛКИ =====
+function confirmDeleteNotification(index) {
+    deleteType = 'notification';
+    deleteTargetId = index;
+    document.getElementById('confirmModalTitle').textContent = 'Подтверждение удаления';
+    document.getElementById('confirmModalText').textContent = 'Вы уверены, что хотите удалить эту рассылку?';
+    document.getElementById('confirmModal').classList.add('active');
+}
+
+// ===== УДАЛЕНИЕ РАССЫЛКИ =====
+async function deleteNotification(index) {
+    try {
+        if (index < 0 || index >= notifications.length) {
+            showToast('❌ Ошибка: рассылка не найдена');
+            return;
+        }
+        
+        // Удаляем из массива
+        notifications.splice(index, 1);
+        
+        // Сохраняем в localStorage
+        saveToLocalStorage();
+        
+        // Сохраняем в облако
+        try {
+            await JSONBinAPI.syncNotifications(notifications);
+            console.log('✅ Рассылка удалена из облака');
+        } catch (error) {
+            console.error('❌ Ошибка удаления рассылки из облака:', error);
+            showToast('❌ Ошибка удаления рассылки');
+            return;
+        }
+        
+        // Обновляем UI
+        updateNotificationHistory();
+        showToast('✅ Рассылка удалена');
+        
+    } catch (error) {
+        console.error('❌ Ошибка удаления рассылки:', error);
+        showToast('❌ Ошибка удаления рассылки');
+    }
+}
+
+// ===== ОЧИСТКА ВСЕХ РАССЫЛОК =====
+function clearAllNotifications() {
+    deleteType = 'clear_all_notifications';
+    document.getElementById('confirmModalTitle').textContent = 'Очистка истории';
+    document.getElementById('confirmModalText').textContent = 'Вы уверены, что хотите удалить ВСЕ рассылки? Это действие нельзя отменить!';
+    document.getElementById('confirmModal').classList.add('active');
+}
+
+async function clearAllNotificationsAction() {
+    try {
+        notifications = [];
+        saveToLocalStorage();
+        await JSONBinAPI.syncNotifications(notifications);
+        updateNotificationHistory();
+        showToast('✅ Все рассылки удалены');
+    } catch (error) {
+        console.error('❌ Ошибка очистки рассылок:', error);
+        showToast('❌ Ошибка очистки рассылок');
+    }
+}
+
+// ============================================
+// УПРАВЛЕНИЕ ТОВАРАМИ
+// ============================================
+
+async function addProduct(data) {
+    const newId = Math.max(...products.map(p => p.id), 0) + 1;
+    products.push({
+        id: newId,
+        ...data,
+        typeName: data.type === 'parfum' ? 'Парфюмерная вода' : 'Туалетная вода',
+        genderName: data.gender === 'male' ? 'Мужское' : data.gender === 'female' ? 'Женское' : 'Унисекс'
+    });
+    saveToLocalStorage();
+    await JSONBinAPI.syncProducts(products);
+    updateProductsTable();
+    showToast('✅ Товар добавлен');
+}
+
+async function updateProduct(id, data) {
+    const idx = products.findIndex(p => p.id === id);
+    if (idx === -1) return;
+    products[idx] = {
+        ...products[idx],
+        ...data,
+        typeName: data.type === 'parfum' ? 'Парфюмерная вода' : 'Туалетная вода',
+        genderName: data.gender === 'male' ? 'Мужское' : data.gender === 'female' ? 'Женское' : 'Унисекс'
+    };
+    saveToLocalStorage();
+    await JSONBinAPI.syncProducts(products);
+    updateProductsTable();
+    showToast('✅ Товар обновлен');
+}
+
+async function deleteProduct(id) {
+    products = products.filter(p => p.id !== id);
+    saveToLocalStorage();
+    await JSONBinAPI.syncProducts(products);
+    updateProductsTable();
+    showToast('✅ Товар удален');
+}
+
+function editProduct(id) {
+    const p = products.find(p => p.id === id);
+    if (!p) return;
+    document.getElementById('editProductId').value = p.id;
+    document.getElementById('productName').value = p.name || '';
+    document.getElementById('productType').value = p.type || 'parfum';
+    document.getElementById('productGender').value = p.gender || 'unisex';
+    document.getElementById('productPrice').value = p.price || '';
+    document.getElementById('productVolume').value = p.volume || '';
+    document.getElementById('productDesc').value = p.desc || '';
+    document.getElementById('productImage').value = p.image || '';
+    document.getElementById('productNotes').value = p.notes || '';
+    document.getElementById('productFullDesc').value = p.fullDesc || '';
+    document.getElementById('formTitle').innerHTML = '✏️ Редактирование товара';
+    document.getElementById('productForm').classList.add('show');
+    document.getElementById('productForm').scrollIntoView({ behavior: 'smooth' });
+}
+
+function resetForm() {
+    document.getElementById('editProductId').value = '';
+    document.getElementById('productName').value = '';
+    document.getElementById('productType').value = 'parfum';
+    document.getElementById('productGender').value = 'unisex';
+    document.getElementById('productPrice').value = '';
+    document.getElementById('productVolume').value = '';
+    document.getElementById('productDesc').value = '';
+    document.getElementById('productImage').value = '';
+    document.getElementById('productNotes').value = '';
+    document.getElementById('productFullDesc').value = '';
+    document.getElementById('formTitle').innerHTML = '➕ Добавление товара';
+    document.getElementById('productForm').classList.add('show');
+}
+
+// ============================================
+// АВТОРИЗАЦИЯ
+// ============================================
+
+function login(email, password) {
+    const user = users.find(u => u.email === email && u.password === password);
+    if (user && user.email === 'admin@aere.com') {
+        currentAdmin = user;
+        localStorage.setItem('adminLoggedIn', 'true');
+        document.getElementById('loginPage').style.display = 'none';
+        document.getElementById('adminWrapper').classList.add('show');
+        document.getElementById('adminName').textContent = user.name;
+        loadData();
+        return true;
+    }
+    document.getElementById('loginError').textContent = 'Неверный email или пароль';
+    document.getElementById('loginError').style.display = 'block';
+    return false;
+}
+
+function logout() {
+    localStorage.removeItem('adminLoggedIn');
+    currentAdmin = null;
+    document.getElementById('loginPage').style.display = 'flex';
+    document.getElementById('adminWrapper').classList.remove('show');
+}
+
+function checkAuth() {
+    if (localStorage.getItem('adminLoggedIn') === 'true') {
+        document.getElementById('loginPage').style.display = 'none';
+        document.getElementById('adminWrapper').classList.add('show');
+        loadData();
+    }
+}
+
+// ============================================
+// СИНХРОНИЗАЦИЯ С ОБЛАКОМ
+// ============================================
+
+async function syncWithCloud() {
+    showLoading(true);
+    try {
+        const data = await JSONBinAPI.getData();
+        if (data) {
+            products = data.products || [];
+            users = data.users || [];
+            orders = data.orders || [];
+            notifications = data.notifications || [];
+            partners = data.partners || [];
+            saveToLocalStorage();
+            updateAllUI();
+            showToast('✅ Данные синхронизированы с облаком');
+        } else {
+            await JSONBinAPI.syncAll(products, users, orders, partners, notifications);
+            showToast('✅ Данные отправлены в облако');
+        }
+    } catch (error) {
+        showToast('❌ Ошибка синхронизации');
+        console.error(error);
+    } finally {
+        showLoading(false);
+    }
+}
+
+// ============================================
+// ТЕМА
+// ============================================
+
+function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme');
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+    if (salesChart) updateChart();
+}
+
+function loadTheme() {
+    const saved = localStorage.getItem('theme');
+    if (saved) document.documentElement.setAttribute('data-theme', saved);
+    else document.documentElement.setAttribute('data-theme', window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+}
+
+// ============================================
+// ПОДТВЕРЖДЕНИЕ УДАЛЕНИЯ
+// ============================================
+
+function confirmDelete(type, target) {
+    deleteType = type;
+    deleteTargetId = target;
+    document.getElementById('confirmModalTitle').textContent = 'Подтверждение удаления';
+    document.getElementById('confirmModalText').textContent = 'Вы уверены, что хотите удалить этот элемент?';
+    document.getElementById('confirmModal').classList.add('active');
+}
+
+// ============================================
+// ВКЛАДКИ
+// ============================================
+
+function initTabs() {
+    document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(btn.dataset.tab + 'Tab').classList.add('active');
+            if (btn.dataset.tab === 'dashboard') updateStatistics();
+            if (btn.dataset.tab === 'orders') updateOrdersTable();
+        });
+    });
+}
+
+// ============================================
+// ИНИЦИАЛИЗАЦИЯ
+// ============================================
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadTheme();
+    const savedUsers = localStorage.getItem('aere_users');
+    if (savedUsers) users = JSON.parse(savedUsers);
+    ensureAdminExists();
+    checkAuth();
+    initTabs();
+
+    document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+    document.getElementById('doLoginBtn').addEventListener('click', () => {
+        login(document.getElementById('adminEmail').value, document.getElementById('adminPassword').value);
+    });
+    document.getElementById('adminPassword').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') document.getElementById('doLoginBtn').click();
+    });
+    document.getElementById('logoutAdminBtn').addEventListener('click', logout);
+    document.getElementById('showAddProductBtn').addEventListener('click', resetForm);
+    document.getElementById('syncCloudBtn').addEventListener('click', syncWithCloud);
+
+    document.getElementById('cancelProductBtn').addEventListener('click', () => {
+        document.getElementById('productForm').classList.remove('show');
+    });
+
+    document.getElementById('saveProductBtn').addEventListener('click', async () => {
+        const editId = document.getElementById('editProductId').value;
+        const data = {
+            name: document.getElementById('productName').value.trim(),
+            type: document.getElementById('productType').value,
+            gender: document.getElementById('productGender').value,
+            price: parseInt(document.getElementById('productPrice').value) || 0,
+            volume: document.getElementById('productVolume').value.trim(),
+            desc: document.getElementById('productDesc').value.trim(),
+            image: document.getElementById('productImage').value.trim(),
+            notes: document.getElementById('productNotes').value.trim(),
+            fullDesc: document.getElementById('productFullDesc').value.trim()
+        };
+        if (!data.name || !data.price) {
+            showToast('❌ Заполните название и цену');
+            return;
+        }
+        if (editId) await updateProduct(parseInt(editId), data);
+        else await addProduct(data);
+        document.getElementById('productForm').classList.remove('show');
+    });
+
+    // ОТПРАВКА УВЕДОМЛЕНИЯ
+    document.getElementById('sendNotificationBtn').addEventListener('click', async () => {
+        const title = document.getElementById('notificationTitle').value.trim();
+        const message = document.getElementById('notificationMessage').value.trim();
+        if (title && message) {
+            await sendNotificationToAll(title, message);
+        } else {
+            showToast('❌ Заполните заголовок и сообщение');
+        }
+    });
+
+    // ОЧИСТКА ВСЕХ РАССЫЛОК
+    document.getElementById('clearAllNotificationsBtn').addEventListener('click', clearAllNotifications);
+
+    // ПОДТВЕРЖДЕНИЕ УДАЛЕНИЯ
+    document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
+        if (deleteType === 'product') {
+            await deleteProduct(deleteTargetId);
+        } else if (deleteType === 'notification') {
+            await deleteNotification(deleteTargetId);
+        } else if (deleteType === 'clear_all_notifications') {
+            await clearAllNotificationsAction();
+        }
+        document.getElementById('confirmModal').classList.remove('active');
+        deleteTargetId = null;
+        deleteType = null;
+    });
+
+    document.getElementById('cancelDeleteBtn').addEventListener('click', () => {
+        document.getElementById('confirmModal').classList.remove('active');
+        deleteTargetId = null;
+        deleteType = null;
+    });
+});
+</script>
+</body>
+</html>
